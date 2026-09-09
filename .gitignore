@@ -1,0 +1,12 @@
+# Ignore everything by default
+*
+
+# Allow directories so git can traverse into subdirectories
+!*/
+
+# Whitelist .gitignore
+!.gitignore
+
+# Whitelist .cpp source files
+!*.cpp
+!**/*.cpp
