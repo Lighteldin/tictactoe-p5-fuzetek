@@ -60,16 +60,73 @@ public:
     // Output: Boolean indicating win condition
     // Function: Checks all win conditions (rows, columns, diagonals)
     bool checkWin(char symbol) const {
-        // TODO: Implement this function
-        return false; // placeholder
+        // Check all rows
+        for (int i = 0; i < size; i++) {
+            bool rowWin = true;
+            for (int j = 0; j < size; j++) {
+                if (grid[i][j] != symbol) {
+                    rowWin = false;
+                }
+            }
+            if (rowWin == true) {
+                return true;
+            }
+        }
+
+        // Check all columns
+        for (int j = 0; j < size; j++) {
+            bool colWin = true;
+            for (int i = 0; i < size; i++) {
+                if (grid[i][j] != symbol) {
+                    colWin = false;
+                }
+            }
+            if (colWin == true) {
+                return true;
+            }
+        }
+
+        // Check top-left to bottom-right diagonal
+        bool diag1Win = true;
+        for (int i = 0; i < size; i++) {
+            if (grid[i][i] != symbol) {
+                diag1Win = false;
+            }
+        }
+        if (diag1Win == true) {
+            return true;
+        }
+
+        // Check top-right to bottom-left diagonal
+        bool diag2Win = true;
+        for (int i = 0; i < size; i++) {
+            if (grid[i][size - 1 - i] != symbol) {
+                diag2Win = false;
+            }
+        }
+        if (diag2Win == true) {
+            return true;
+        }
+
+        // If no win was found
+        return false;
     }
 
     // Input: None
     // Output: Boolean indicating board full status
     // Function: Checks if all cells are occupied
     bool isFull() const {
-        // TODO: Implement this function
-        return false; // placeholder
+        // Check every cell in the grid
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (grid[i][j] == ' ') {
+                    // Found an empty space, so the board is not full
+                    return false; 
+                }
+            }
+        }
+        // If the loops finish and no empty spaces were found, the board is full
+        return true; 
     }
 
     // Input: row (0-based), col (0-based)
