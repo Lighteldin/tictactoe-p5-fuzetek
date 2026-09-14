@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
 using namespace std;
 
 // AI difficulty levels
@@ -236,7 +237,7 @@ public:
     // Output: Constructs Game object
     // Function: Initializes game with empty board and null players
     Game() : player1(nullptr), player2(nullptr), currentPlayer(nullptr) {
-        // TODO: Implement this function
+        ////////
     }
 
     // Input: None
@@ -250,28 +251,80 @@ public:
     // Output: None
     // Function: Displays mode selection menu and handles user choice
     void showMenu() {
-        // TODO: Implement this function
+        int choice = -1;
+        while (true) {
+            cout << "TIC-TAC-TOE GAME\n";
+            cout << "===================\n";
+            cout << "1. Player vs Player\n";
+            cout << "2. Player vs Computer (Easy)\n";
+            cout << "3. Player vs Computer (Hard)\n";
+            cout << "4. Exit\n";
+            cout << "Select game mode: ";
+            string input;
+            cin >> input;
+            bool isNumeric = !input.empty() && all_of(input.begin(), input.end(), ::isdigit);
+            if (isNumeric) {
+                choice = stoi(input);
+            }
+            if (!isNumeric || choice < 1 || choice > 4) {
+                cout << "Invalid selection. Please choose 1-4.\n";
+                continue; 
+            }
+            break;
+        }
+        switch (choice) {
+            case 1:
+                setupPvP();
+                break;
+            case 2:
+                setupPvC(Difficulty::EASY);
+                break;
+            case 3:
+                setupPvC(Difficulty::HARD);
+                break;
+            case 4:
+                cout << "Thanks for playing! Goodbye.\n";
+                delete player1;
+                delete player2;
+                exit(0);
+        }
     }
 
     // Input: None
     // Output: None
     // Function: Configures player vs player mode with user input
     void setupPvP() {
-        // TODO: Implement this function
+        delete player1;
+        delete player2;
+        string name1, name2;
+        cout << "Enter name for Player 1 (X): ";
+        cin >> name1;
+        cout << "Enter name for Player 2 (O): ";
+        cin >> name2;
+        player1 = new HumanPlayer(name1, 'X');
+        player2 = new HumanPlayer(name2, 'O');
+        currentPlayer = player1;
     }
 
     // Input: AI difficulty level
     // Output: None
     // Function: Configures player vs computer mode with user input
     void setupPvC(Difficulty difficulty) {
-        // TODO: Implement this function
+        delete player1;
+        delete player2;
+        string name;
+        cout << "Enter your name: ";
+        cin >> name;
+        player1 = new HumanPlayer(name, 'X');
+        player2 = new AIPlayer("Computer", 'O', difficulty);
+        currentPlayer = player1;
     }
 
     // Input: None
     // Output: None
     // Function: Alternates current player between players
     void switchPlayer() {
-        // TODO: Implement this function
+        currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
 
     // Input: Pointer to human player
