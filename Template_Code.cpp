@@ -62,16 +62,73 @@ public:
     // Output: Boolean indicating win condition
     // Function: Checks all win conditions (rows, columns, diagonals)
     bool checkWin(char symbol) const {
-        // TODO: Implement this function
-        return false; // placeholder
+        // Check all rows
+        for (int i = 0; i < size; i++) {
+            bool rowWin = true;
+            for (int j = 0; j < size; j++) {
+                if (grid[i][j] != symbol) {
+                    rowWin = false;
+                }
+            }
+            if (rowWin == true) {
+                return true;
+            }
+        }
+
+        // Check all columns
+        for (int j = 0; j < size; j++) {
+            bool colWin = true;
+            for (int i = 0; i < size; i++) {
+                if (grid[i][j] != symbol) {
+                    colWin = false;
+                }
+            }
+            if (colWin == true) {
+                return true;
+            }
+        }
+
+        // Check top-left to bottom-right diagonal
+        bool diag1Win = true;
+        for (int i = 0; i < size; i++) {
+            if (grid[i][i] != symbol) {
+                diag1Win = false;
+            }
+        }
+        if (diag1Win == true) {
+            return true;
+        }
+
+        // Check top-right to bottom-left diagonal
+        bool diag2Win = true;
+        for (int i = 0; i < size; i++) {
+            if (grid[i][size - 1 - i] != symbol) {
+                diag2Win = false;
+            }
+        }
+        if (diag2Win == true) {
+            return true;
+        }
+
+        // If no win was found
+        return false;
     }
 
     // Input: None
     // Output: Boolean indicating board full status
     // Function: Checks if all cells are occupied
     bool isFull() const {
-        // TODO: Implement this function
-        return false; // placeholder
+        // Check every cell in the grid
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (grid[i][j] == ' ') {
+                    // Found an empty space, so the board is not full
+                    return false; 
+                }
+            }
+        }
+        // If the loops finish and no empty spaces were found, the board is full
+        return true; 
     }
 
     // Input: row (0-based), col (0-based)
@@ -309,7 +366,7 @@ public:
     // Output: Constructs Game object
     // Function: Initializes game with empty board and null players
     Game() : player1(nullptr), player2(nullptr), currentPlayer(nullptr) {
-        // TODO: Implement this function
+        ////////
     }
 
     // Input: None
@@ -317,34 +374,119 @@ public:
     // Function: Main game entry point, controls overall flow
     void start() {
         // TODO: Implement this function
+        bool playAgain = true;
+        while (playAgain) {
+            showMenu();
+
+            bool gameOver = false;
+            while (!gameOver) {
+                board.display();
+
+                AIPlayer* ai = dynamic_cast<AIPlayer*>(currentPlayer);
+                if (ai != nullptr) {
+                    handleAIMove(ai);
+                } else {
+                    handleHumanMove(currentPlayer);
+                }
+
+                if (checkGameEnd()) {
+                    board.display();
+                    displayResult();
+                    gameOver = true;
+                } else {
+                    switchPlayer();
+                }
+            }
+
+            cout << "Do you want to play again? (y/n): ";
+            char choice;
+            cin >> choice;
+            if (choice == 'y' || choice == 'Y') {
+                reset();
+            } else {
+                playAgain = false;
+            }
+        }
     }
 
     // Input: None
     // Output: None
     // Function: Displays mode selection menu and handles user choice
     void showMenu() {
-        // TODO: Implement this function
+        int choice = -1;
+        while (true) {
+            cout << "TIC-TAC-TOE GAME\n";
+            cout << "===================\n";
+            cout << "1. Player vs Player\n";
+            cout << "2. Player vs Computer (Easy)\n";
+            cout << "3. Player vs Computer (Hard)\n";
+            cout << "4. Exit\n";
+            cout << "Select game mode: ";
+            string input;
+            cin >> input;
+            bool isNumeric = !input.empty() && all_of(input.begin(), input.end(), ::isdigit);
+            if (isNumeric) {
+                choice = stoi(input);
+            }
+            if (!isNumeric || choice < 1 || choice > 4) {
+                cout << "Invalid selection. Please choose 1-4.\n";
+                continue; 
+            }
+            break;
+        }
+        switch (choice) {
+            case 1:
+                setupPvP();
+                break;
+            case 2:
+                setupPvC(Difficulty::EASY);
+                break;
+            case 3:
+                setupPvC(Difficulty::HARD);
+                break;
+            case 4:
+                cout << "Thanks for playing! Goodbye.\n";
+                delete player1;
+                delete player2;
+                exit(0);
+        }
     }
 
     // Input: None
     // Output: None
     // Function: Configures player vs player mode with user input
     void setupPvP() {
-        // TODO: Implement this function
+        delete player1;
+        delete player2;
+        string name1, name2;
+        cout << "Enter name for Player 1 (X): ";
+        cin >> name1;
+        cout << "Enter name for Player 2 (O): ";
+        cin >> name2;
+        player1 = new HumanPlayer(name1, 'X');
+        player2 = new HumanPlayer(name2, 'O');
+        currentPlayer = player1;
     }
 
     // Input: AI difficulty level
     // Output: None
     // Function: Configures player vs computer mode with user input
     void setupPvC(Difficulty difficulty) {
-        // TODO: Implement this function
+        delete player1;
+        delete player2;
+        string name;
+        cout << "Enter your name: ";
+        cin >> name;
+        player1 = new HumanPlayer(name, 'X');
+        player2 = new AIPlayer("Computer", 'O', difficulty);
+        currentPlayer = player1;
     }
 
     // Input: None
     // Output: None
     // Function: Alternates current player between players
     void switchPlayer() {
-        // TODO: Implement this function
+        currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
 
     // Input: Pointer to human player
@@ -352,6 +494,27 @@ public:
     // Function: Processes human player input and validates moves
     void handleHumanMove(Player* player) {
         // TODO: Implement this function
+        int row, col;
+        while (true) {
+            cout << player->getName() << " (" << player->getSymbol()
+                 << "), enter row and column (1-" << board.getSize() << "): ";
+            if (!(cin >> row >> col)) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cout << "Invalid input. Please enter numbers.\n";
+                continue;
+            }
+
+            int zeroRow = row - 1;
+            int zeroCol = col - 1;
+
+            if (board.isValidMove(zeroRow, zeroCol)) {
+                board.makeMove(zeroRow, zeroCol, player->getSymbol());
+                break;
+            } else {
+                cout << "Invalid move! Cell is either occupied or out of range. Try again.\n";
+            }
+        }
     }
 
     // Input: Pointer to AI player
@@ -359,6 +522,10 @@ public:
     // Function: Executes AI move calculation and placement
     void handleAIMove(AIPlayer* aiPlayer) {
         // TODO: Implement this function
+        int row = -1, col = -1;
+        cout << aiPlayer->getName() << " is calculating move...\n";
+        aiPlayer->getMove(row, col);
+        board.makeMove(row, col, aiPlayer->getSymbol());
     }
 
     // Input: None
@@ -366,6 +533,12 @@ public:
     // Function: Checks win conditions and board full status
     bool checkGameEnd() {
         // TODO: Implement this function
+        if (currentPlayer != nullptr && board.checkWin(currentPlayer->getSymbol())) {
+            return true;
+        }
+        if (board.isFull()) {
+            return true;
+        }
         return false; // placeholder
     }
 
@@ -374,6 +547,11 @@ public:
     // Function: Shows game outcome message
     void displayResult() const {
         // TODO: Implement this function
+        if (currentPlayer != nullptr && board.checkWin(currentPlayer->getSymbol())) {
+            cout << "Congratulations! Player " << currentPlayer->getName() << " wins!\n";
+        } else if (board.isFull()) {
+            cout << "The game ended in a draw!\n";
+        }
     }
 
     // Input: None
@@ -381,6 +559,12 @@ public:
     // Function: Prepares game for new round
     void reset() {
         // TODO: Implement this function
+        board.reset();
+        delete player1;
+        delete player2;
+        player1 = nullptr;
+        player2 = nullptr;
+        currentPlayer = nullptr;
     }
 };
 
