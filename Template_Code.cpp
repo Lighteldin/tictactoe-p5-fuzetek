@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <climits>
 using namespace std;
 
 // AI difficulty levels
@@ -232,6 +233,47 @@ class AIPlayer : public Player {
 private:
     Difficulty difficulty;
 
+    int minimax(Board board, bool isMaximizing) const {
+        char mySymbol = getSymbol();
+        char oppSymbol = (mySymbol == 'X') ? 'O' : 'X';
+
+        // Terminal state check — stop recursing and score the board
+        if (board.checkWin(mySymbol) || board.checkWin(oppSymbol) || board.isFull()) {
+            return evaluateBoard(board);
+        }
+
+        int size = board.getSize();
+
+        if (isMaximizing) {
+            int bestScore = INT_MIN;
+            for (int r = 0; r < size; r++) {
+                for (int c = 0; c < size; c++) {
+                    if (board.isValidMove(r, c)) {
+                        Board simulated = board;
+                        simulated.makeMove(r, c, mySymbol);
+                        int score = minimax(simulated, false);
+                        bestScore = max(bestScore, score);
+                    }
+                }
+            }
+            return bestScore;
+        } else {
+            int bestScore = INT_MAX;
+            for (int r = 0; r < size; r++) {
+                for (int c = 0; c < size; c++) {
+                    if (board.isValidMove(r, c)) {
+                        Board simulated = board;
+                        simulated.makeMove(r, c, oppSymbol);
+                        int score = minimax(simulated, true);
+                        bestScore = min(bestScore, score);
+                    }
+                }
+            }
+            return bestScore;
+        }
+    }
+
+
 public:
     // Input: AI name, symbol, difficulty level
     // Output: Constructs AIPlayer object
@@ -266,15 +308,45 @@ public:
     // Output: None (modifies row/col references)
     // Function: Finds optimal move (research minimax algorithm for implementation)
     void getBestMove(const Board& board, int& row, int& col) const {
-        // TODO: Implement this function
+        int bestScore = INT_MIN;
+        int bestRow = -1;
+        int bestCol = -1;
+        int size = board.getSize();
+
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size; c++) {
+                if (board.isValidMove(r, c)) {
+                    Board simulated = board;
+                    simulated.makeMove(r, c, getSymbol());
+                    int score = minimax(simulated, false); // opponent moves next
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestRow = r;
+                        bestCol = c;
+                    }
+                }
+            }
+        }
+
+        row = bestRow;
+        col = bestCol;
     }
 
     // Input: Board reference
     // Output: Integer score (-10, 0, +10)
     // Function: Evaluates board state for scoring (win/loss/draw)
     int evaluateBoard(const Board& board) const {
-        // TODO: Implement this function
-        return 0; // placeholder
+        char mySymbol = getSymbol();
+        char oppSymbol = (mySymbol == 'X') ? 'O' : 'X';
+
+        if (board.checkWin(mySymbol)) {
+            return 10;
+        }
+        if (board.checkWin(oppSymbol)) {
+            return -10;
+        }
+        return 0;
     }
 };
 
