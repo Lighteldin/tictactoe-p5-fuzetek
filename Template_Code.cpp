@@ -21,27 +21,44 @@ enum class Difficulty {
 // ============================================================
 class Board {
 private:
-    // 3x3 grid representation
     vector<vector<char>> grid;
-
-    // Board size constant (default: 3)
     const int size;
 
 public:
-    // Input: Optional size parameter (default 3)
-    // Output: Constructs Board object
-    // Function: Initializes empty grid of given size
     Board(int size = 3) : size(size) {
-        // TODO: Implement this function
+        grid = vector<vector<char>>(size, vector<char>(size, ' '));
     }
 
-    // Input: None
-    // Output: Prints formatted board to console
-    // Function: Displays current board state with coordinates and borders
     void display() const {
-        // TODO: Implement this function
-    }
+        cout << " ";
+        for (int j = 0; j < size; j++) {
+            cout << " " << (j + 1);
+        }
+        cout << "\n";
 
+        for (int i = 0; i < size; i++) {
+            cout << (i + 1);
+
+            for (int j = 0; j < size; j++) {
+                cout << " " << grid[i][j];
+
+                if (j != size - 1)
+                    cout << " |";
+            }
+
+            cout << "\n";
+
+            if (i != size - 1) {
+                for (int j = 0; j < size; j++) {
+                    cout << "---";
+
+                    if (j != size - 1)
+                        cout << "+";
+                }
+                cout << "\n";
+            }
+        }
+    }
     // Input: row (0-based), col (0-based), player symbol (X/O)
     // Output: Boolean indicating move success
     // Function: Places symbol if move is valid, returns success status
@@ -123,12 +140,12 @@ public:
             for (int j = 0; j < size; j++) {
                 if (grid[i][j] == ' ') {
                     // Found an empty space, so the board is not full
-                    return false; 
+                    return false;
                 }
             }
         }
         // If the loops finish and no empty spaces were found, the board is full
-        return true; 
+        return true;
     }
 
     // Input: row (0-based), col (0-based)
@@ -143,15 +160,15 @@ public:
     // Output: None
     // Function: Clears all cells to empty state
     void reset() {
-        // TODO: Implement this function
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                grid[i][j] = ' ';
+            }
+        }
     }
 
-    // Input: None
-    // Output: Integer representing board size
-    // Function: Returns the dimension of the board
     int getSize() const {
-        // TODO: Implement this function
-        return 0; // placeholder
+        return size;
     }
 };
 
@@ -430,7 +447,7 @@ public:
             }
             if (!isNumeric || choice < 1 || choice > 4) {
                 cout << "Invalid selection. Please choose 1-4.\n";
-                continue; 
+                continue;
             }
             break;
         }
