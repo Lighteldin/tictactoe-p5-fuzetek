@@ -245,6 +245,39 @@ public:
     // Function: Main game entry point, controls overall flow
     void start() {
         // TODO: Implement this function
+        bool playAgain = true;
+        while (playAgain) {
+            showMenu();
+
+            bool gameOver = false;
+            while (!gameOver) {
+                board.display();
+
+                AIPlayer* ai = dynamic_cast<AIPlayer*>(currentPlayer);
+                if (ai != nullptr) {
+                    handleAIMove(ai);
+                } else {
+                    handleHumanMove(currentPlayer);
+                }
+
+                if (checkGameEnd()) {
+                    board.display();
+                    displayResult();
+                    gameOver = true;
+                } else {
+                    switchPlayer();
+                }
+            }
+
+            cout << "Do you want to play again? (y/n): ";
+            char choice;
+            cin >> choice;
+            if (choice == 'y' || choice == 'Y') {
+                reset();
+            } else {
+                playAgain = false;
+            }
+        }
     }
 
     // Input: None
@@ -332,6 +365,27 @@ public:
     // Function: Processes human player input and validates moves
     void handleHumanMove(Player* player) {
         // TODO: Implement this function
+        int row, col;
+        while (true) {
+            cout << player->getName() << " (" << player->getSymbol()
+                 << "), enter row and column (1-" << board.getSize() << "): ";
+            if (!(cin >> row >> col)) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cout << "Invalid input. Please enter numbers.\n";
+                continue;
+            }
+
+            int zeroRow = row - 1;
+            int zeroCol = col - 1;
+
+            if (board.isValidMove(zeroRow, zeroCol)) {
+                board.makeMove(zeroRow, zeroCol, player->getSymbol());
+                break;
+            } else {
+                cout << "Invalid move! Cell is either occupied or out of range. Try again.\n";
+            }
+        }
     }
 
     // Input: Pointer to AI player
@@ -339,6 +393,10 @@ public:
     // Function: Executes AI move calculation and placement
     void handleAIMove(AIPlayer* aiPlayer) {
         // TODO: Implement this function
+        int row = -1, col = -1;
+        cout << aiPlayer->getName() << " is calculating move...\n";
+        aiPlayer->getMove(row, col);
+        board.makeMove(row, col, aiPlayer->getSymbol());
     }
 
     // Input: None
@@ -346,6 +404,12 @@ public:
     // Function: Checks win conditions and board full status
     bool checkGameEnd() {
         // TODO: Implement this function
+        if (currentPlayer != nullptr && board.checkWin(currentPlayer->getSymbol())) {
+            return true;
+        }
+        if (board.isFull()) {
+            return true;
+        }
         return false; // placeholder
     }
 
@@ -354,6 +418,11 @@ public:
     // Function: Shows game outcome message
     void displayResult() const {
         // TODO: Implement this function
+        if (currentPlayer != nullptr && board.checkWin(currentPlayer->getSymbol())) {
+            cout << "Congratulations! Player " << currentPlayer->getName() << " wins!\n";
+        } else if (board.isFull()) {
+            cout << "The game ended in a draw!\n";
+        }
     }
 
     // Input: None
@@ -361,6 +430,12 @@ public:
     // Function: Prepares game for new round
     void reset() {
         // TODO: Implement this function
+        board.reset();
+        delete player1;
+        delete player2;
+        player1 = nullptr;
+        player2 = nullptr;
+        currentPlayer = nullptr;
     }
 };
 
