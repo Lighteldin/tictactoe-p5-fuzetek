@@ -62,18 +62,23 @@ public:
     // Input: row (0-based), col (0-based), player symbol (X/O)
     // Output: Boolean indicating move success
     // Function: Places symbol if move is valid, returns success status
-    bool makeMove(int row, int col, char symbol) {
-        // TODO: Implement this function
-        return false; // placeholder
+   bool makeMove(int row, int col, char symbol) {
+    if (!isValidMove(row, col)) {
+        return false;
     }
+    grid[row][col] = symbol;
+    return true;
+}
 
     // Input: row (0-based), col (0-based)
     // Output: Boolean indicating move validity
     // Function: Checks if coordinates are valid and cell is empty
-    bool isValidMove(int row, int col) const {
-        // TODO: Implement this function
-        return false; // placeholder
+bool isValidMove(int row, int col) const {
+    if (row < 0 || row >= size || col < 0 || col >= size) {
+        return false;
     }
+    return grid[row][col] == ' ';
+}
 
     // Input: Player symbol (X/O)
     // Output: Boolean indicating win condition
@@ -151,10 +156,9 @@ public:
     // Input: row (0-based), col (0-based)
     // Output: Character representing cell content
     // Function: Returns the symbol at specified coordinates
-    char getCell(int row, int col) const {
-        // TODO: Implement this function
-        return ' '; // placeholder
-    }
+   char getCell(int row, int col) const {
+    return grid[row][col];
+}
 
     // Input: None
     // Output: None
@@ -185,39 +189,28 @@ public:
     // Input: Player name string, symbol character
     // Output: Constructs Player object
     // Function: Initializes player with name and symbol
-    Player(const string& name, char symbol) {
-        // TODO: Implement this function
-    }
+ Player(const string& name, char symbol) {
+    this->name = name;
+    this->symbol = symbol;
+}
+string getName() const {
+    return name;
+}
+char getSymbol() const {
+    return symbol;
+}
+void setName(const string& name) {
+    this->name = name;
+}
 
     virtual ~Player() {}
 
     // Input: References to row and column variables
     // Output: None (pure virtual)
     // Function: Abstract method to be implemented by derived classes
-    virtual void getMove(int& row, int& col) = 0;
+    virtual void getMove(int& row, int& col, const Board& board) = 0;
 
-    // Input: None
-    // Output: Player name string
-    // Function: Returns player's name
-    string getName() const {
-        // TODO: Implement this function
-        return ""; // placeholder
-    }
-
-    // Input: None
-    // Output: Player symbol character
-    // Function: Returns player's symbol
-    char getSymbol() const {
-        // TODO: Implement this function
-        return ' '; // placeholder
-    }
-
-    // Input: New name string
-    // Output: None
-    // Function: Updates player's name
-    void setName(const string& name) {
-        // TODO: Implement this function
-    }
+   
 };
 
 // ============================================================
@@ -237,9 +230,9 @@ public:
     // Function: Not used directly — Game::handleHumanMove() collects and
     // validates console input for human players. Kept as a no-op override
     // so HumanPlayer is a valid, instantiable concrete class.
-    void getMove(int& row, int& col) override {
-        // TODO: Implement this function (if needed)
-    }
+   void getMove(int& row, int& col, const Board& board) override {
+    // Intentionally empty — Game::handleHumanMove() handles human input directly.
+}
 };
 
 // ============================================================
@@ -295,31 +288,45 @@ public:
     // Input: AI name, symbol, difficulty level
     // Output: Constructs AIPlayer object
     // Function: Initializes AI player with specified parameters
-    AIPlayer(const string& name, char symbol, Difficulty difficulty)
-        : Player(name, symbol) {
-        // TODO: Implement this function
-    }
+   AIPlayer(const string& name, char symbol, Difficulty difficulty)
+    : Player(name, symbol), difficulty(difficulty) {
+}
 
     // Input: References to row and column variables
     // Output: None
     // Function: Determines AI move based on difficulty level
-    void getMove(int& row, int& col) override {
-        // TODO: Implement this function
+  void getMove(int& row, int& col, const Board& board) override {
+    if (difficulty == Difficulty::EASY) {
+        getRandomMove(board, row, col);
+    } else {
+        getBestMove(board, row, col);
     }
+}
 
     // Input: New difficulty level
     // Output: None
     // Function: Changes AI difficulty setting
-    void setDifficulty(Difficulty newDifficulty) {
-        // TODO: Implement this function
-    }
+  void setDifficulty(Difficulty newDifficulty) {
+    difficulty = newDifficulty;
+}
 
     // Input: Board reference, references to row and column variables
     // Output: None (modifies row/col references)
     // Function: Selects random valid move for easy difficulty
-    void getRandomMove(const Board& board, int& row, int& col) const {
-        // TODO: Implement this function
+  void getRandomMove(const Board& board, int& row, int& col) const {
+    vector<pair<int, int>> validMoves;
+    int size = board.getSize();
+    for (int r = 0; r < size; r++) {
+        for (int c = 0; c < size; c++) {
+            if (board.isValidMove(r, c)) {
+                validMoves.push_back({r, c});
+            }
+        }
     }
+    int index = rand() % validMoves.size();
+    row = validMoves[index].first;
+    col = validMoves[index].second;
+}
 
     // Input: Board reference, references to row and column variables
     // Output: None (modifies row/col references)
@@ -541,7 +548,7 @@ public:
         // TODO: Implement this function
         int row = -1, col = -1;
         cout << aiPlayer->getName() << " is calculating move...\n";
-        aiPlayer->getMove(row, col);
+        aiPlayer->getMove(row, col, board);
         board.makeMove(row, col, aiPlayer->getSymbol());
     }
 
