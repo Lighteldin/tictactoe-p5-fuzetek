@@ -169,7 +169,8 @@ public:
     // Output: Constructs Player object
     // Function: Initializes player with name and symbol
     Player(const string& name, char symbol) {
-        // TODO: Implement this function
+        this->name = name;
+        this->symbol = symbol;
     }
 
     virtual ~Player() {}
@@ -183,23 +184,21 @@ public:
     // Output: Player name string
     // Function: Returns player's name
     string getName() const {
-        // TODO: Implement this function
-        return ""; // placeholder
+        return name;
     }
 
     // Input: None
     // Output: Player symbol character
     // Function: Returns player's symbol
     char getSymbol() const {
-        // TODO: Implement this function
-        return ' '; // placeholder
+        return symbol;
     }
 
     // Input: New name string
     // Output: None
     // Function: Updates player's name
     void setName(const string& name) {
-        // TODO: Implement this function
+        this->name = name;
     }
 };
 
@@ -221,7 +220,7 @@ public:
     // validates console input for human players. Kept as a no-op override
     // so HumanPlayer is a valid, instantiable concrete class.
     void getMove(int& row, int& col) override {
-        // TODO: Implement this function (if needed)
+        // No-op: Console input handled by Game::handleHumanMove()
     }
 };
 
